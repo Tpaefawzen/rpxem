@@ -3,21 +3,22 @@ require 'scanf'
 
 module RPxem
   class Interpreter
-    attr_accessor :mapping
+    attr_accessor :mapping, :encoding
     attr_reader   :stack, :temp
 
-    def initialize(mapping={})
+    def initialize(mapping={}, encoding="binary")
       @mapping = default_mapping().merge(mapping)
+      @encoding = encoding
     end
 
     # Open and execute a Pxem file
     def open(file, stack=RPxem::Stack.new, temp=nil)
-      run(File.basename(file), File.open(file).read, stack, temp)
+      run(File.basename(file), File.open(file, encoding: @encoding).read, stack, temp)
     end
 
     # Execute a Pxem code
     def run(filename, source='', stack=RPxem::Stack.new, temp=nil)
-      @filename, @source, @stack, @temp = filename.each_byte.to_a, source, stack, temp
+      @filename, @source, @stack, @temp = filename.force_encoding(@encoding).each_char.map{_1.ord}, source, stack, temp
       buffer, @cursor, length = RPxem::Stack.new, 0, @filename.length
 
       while (@cursor < length)
@@ -126,7 +127,7 @@ module RPxem
 
     # .f:
     def read_file
-      @stack.push(*@source.each_byte.to_a.reverse)
+      @stack.push(*@source.force_encoding(@encoding).each_char.map{_1.ord}.reverse)
     end
 
     # .e:
