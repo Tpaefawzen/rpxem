@@ -3,8 +3,8 @@ require 'rpxem/version'
 
 module RPxem
   class << self
-    def new(options={})
-      RPxem::Interpreter.new(options)
+    def new(options={}, encoding="binary")
+      RPxem::Interpreter.new(options, encoding)
     end
 
   private
